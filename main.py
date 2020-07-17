@@ -48,10 +48,8 @@ def animate_df(df):
     
     ax.set_xlim(left=x_min, right=x_max)
     ax.barh(rank, values, tick_label=categories, color=colors)
-
-    plt.savefig('saved_bar_graphs/bargraph' + str(frame) + '.png')
-
     plt.title('Animated Bar Racer Chart')
+
     plt.ylabel('Categories')
     plt.xlabel('Amount')
 
