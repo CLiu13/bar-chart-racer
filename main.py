@@ -12,7 +12,7 @@ def main():
   animate_df(df)
 
 def process_data(file_name):
-  df = pd.read_csv(file_name)
+  df = pd.read_csv(file_name, index_col='Date')
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
