@@ -2,6 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animate
 import random
+import datetime
 
 def main():
   
@@ -11,7 +12,7 @@ def main():
   animate_df(df)
 
 def process_data(file_name):
-  df = pd.read_csv(file_name, index_col='Date')
+  df = pd.read_csv(file_name)
 
   #####
   # this part is specific to parsing the dates in the covid data file
