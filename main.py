@@ -7,11 +7,25 @@ def main():
   
   # put input part here
 
-  df = process_data('sample.csv')
+  df = process_data('cases_by_country.csv')
   animate_df(df)
 
 def process_data(file_name):
   df = pd.read_csv(file_name, index_col='Date')
+
+  #####
+  # this part is specific to parsing the dates in the covid data file
+  df = df.fillna(value=0)
+
+  is_date = True
+  if is_date:
+    format_string = "%d/%m/%Y"
+    
+    df['Date'].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+    print(df.index)
+
+  df.set_index('Date')
+  ######
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
