@@ -40,8 +40,21 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
+  elif row_num> > num_frames:
+    df =condense_df(df, frame_num)
 
-  return df
+    return df
+
+def condense_df(df, frame_num):
+ 
+  dfempty = pd.DataFrame()
+
+  for i in range(0, len(df) + 1, 2):
+    print(df.iloc[i])
+    dfempty = dfempty.append(df.iloc[i])
+    
+  print(dfempty)
+  return dfempty
 
 def expand_df(df, num_frames):
   step = num_frames // df.index.size
