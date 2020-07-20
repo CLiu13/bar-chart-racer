@@ -41,6 +41,7 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
+  else:
     df = condense_df(df, frame_num):
 
 def condense_df(df, frame_num):
