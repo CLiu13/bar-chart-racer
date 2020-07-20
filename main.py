@@ -8,11 +8,11 @@ def main():
   
   # put input part here
 
-  df = process_data('cases_by_country.csv', 100, True, "%d/%m/%Y")
-  # df = process_data('sample.csv', 1000, False)
+  # df = process_data('cases_by_country.csv', 100, True, "%d/%m/%Y")
+  df = process_data('sample.csv', 1000)
   animate_df(df)
 
-def process_data(file_name, num_frames, is_date, format_string="%m/%d/%Y"):
+def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name, index_col='Date')
   
   df = df.fillna(value=0)
@@ -39,19 +39,25 @@ def process_data(file_name, num_frames, is_date, format_string="%m/%d/%Y"):
   print(row_num)
 
   if row_num < num_frames:
-    step = num_frames // row_num 
-
-    # rescale - when number of rows is too small 
-    df = df.reset_index() # remove date as our index column
-    new_idx = pd.Series(range(step, num_frames + 1, step)) 
-    df = df.set_index(new_idx)
-    indices = range(new_idx[0], new_idx[len(new_idx) - 1] + 1)
-    df = df.reindex(indices)
-    df = df.interpolate()
-  
-    df = df.set_index('Date')
+    df = expand_df(df, num_frames)
 
   return df
+
+def expand_df(df, num_frames):
+  step = num_frames // df.index.size
+
+  # rescale - when number of rows is too small 
+  df = df.reset_index() # remove date as our index column
+  new_idx = pd.Series(range(step, num_frames + 1, step)) 
+  df = df.set_index(new_idx)
+  indices = range(new_idx[0], new_idx[len(new_idx) - 1] + 1)
+  df = df.reindex(indices)
+  df = df.interpolate()
+
+  df = df.set_index('Date')
+
+  return df
+
 
 def animate_df(df):
   num_bars = len(df.iloc[0])
