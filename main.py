@@ -1,6 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.animation as animate
+import matplotlib.animation as animation
 import random
 import datetime
 
@@ -13,17 +13,16 @@ def main():
   animate_df(df)
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
-  df = pd.read_csv(file_name, index_col='Date')
+  df = pd.read_csv(file_name)
+  index_col_name = df.columns[0]
+  df = df.set_index(index_col_name)
   
   df = df.fillna(value=0)
 
   if is_date:
-    df = df.reset_index()
-    
-    df['Date'] =  df['Date'].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
-    print(df.index)
-    df = df.set_index('Date')
-    print(df.index)
+    df = df.reset_index()    
+    df[index_col_name] =  df[index_col_name].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+    df = df.set_index(index_col_name)
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
@@ -36,7 +35,6 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   df = df.interpolate()
 
   row_num = df.index.size
-  print(row_num)
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
@@ -54,13 +52,13 @@ def expand_df(df, num_frames):
   df = df.reindex(indices)
   df = df.interpolate()
 
-  df = df.set_index('Date')
+  df = df.set_index(df.columns[0])
 
   return df
 
 
 def animate_df(df):
-  num_bars = len(df.iloc[0])
+  num_bars = len(df.columns)
   colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
   max_bar = df.max().max()
@@ -88,27 +86,17 @@ def animate_df(df):
     plt.ylabel('Categories')
     plt.xlabel('Amount')
 
-  animation = animate.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
+  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
   plt.show()
 
 def rand_colors(num_colors, min_val=0, max_val=1):
-    # input validation
-    if min_val < 0 or min_val > 1:
-      min_val = 0
-    if max_val < 0 or max_val > 1:
-      max_val = 1
-    if min_val > max_val:
-      temp = min_val
-      min_val = max_val
-      max_val = temp
-    
-    colors = []
-    for i in range(num_colors):
-      r = random.uniform(min_val, max_val)
-      g = random.uniform(min_val, max_val)
-      b = random.uniform(min_val, max_val)
-      colors.append((r, g, b))
-    return colors
+  colors = []
+  for i in range(num_colors):
+    r = random.uniform(min_val, max_val)
+    g = random.uniform(min_val, max_val)
+    b = random.uniform(min_val, max_val)
+    colors.append((r, g, b))
+  return colors
 
 main()
