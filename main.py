@@ -41,11 +41,10 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
-<<<<<<< HEAD
-  else:
-    df = condense_df(df, frame_num):
+  elif row_num > num_frames:
+    df = condense_df(df, num_frames)
 
-def condense_df(df, frame_num):
+def condense_df(df, num_frames):
  
   dfempty = pd.DataFrame()
 
@@ -55,7 +54,6 @@ def condense_df(df, frame_num):
     
   return dfempty
 
-
 def expand_df(df, num_frames):
   step = num_frames // df.index.size
 
@@ -70,27 +68,6 @@ def expand_df(df, num_frames):
   df = df.set_index('Date')
 
   return df
-
-=======
-
-  return df
-
-def expand_df(df, num_frames):
-  step = num_frames // df.index.size
-
-  # rescale - when number of rows is too small 
-  df = df.reset_index() # remove date as our index column
-  new_idx = pd.Series(range(step, num_frames + 1, step)) 
-  df = df.set_index(new_idx)
-  indices = range(new_idx[0], new_idx[len(new_idx) - 1] + 1)
-  df = df.reindex(indices)
-  df = df.interpolate()
-
-  df = df.set_index('Date')
-
-  return df
-
->>>>>>> d98283d4ae96251831ee16bd2cffd5846f4ec489
 
 def animate_df(df):
   num_bars = len(df.iloc[0])
