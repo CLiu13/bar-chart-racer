@@ -1,5 +1,5 @@
   
- import pandas as pd
+  import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animate
 import random
@@ -41,10 +41,9 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
-  elif row_num > num_frames:
-    df = condense_df(df, num_frames)
+    df = condense_df(df, frame_num):
 
-def condense_df(df, num_frames):
+def condense_df(df, frame_num):
  
   dfempty = pd.DataFrame()
 
@@ -53,6 +52,7 @@ def condense_df(df, num_frames):
     dfempty = dfempty.append(df.iloc[i])
     
   return dfempty
+
 
 def expand_df(df, num_frames):
   step = num_frames // df.index.size
@@ -68,6 +68,7 @@ def expand_df(df, num_frames):
   df = df.set_index('Date')
 
   return df
+
 
 def animate_df(df):
   num_bars = len(df.iloc[0])
