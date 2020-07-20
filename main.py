@@ -1,5 +1,5 @@
   
- import pandas as pd
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.animation as animate
 import random
@@ -43,6 +43,8 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
     df = expand_df(df, num_frames)
   elif row_num > num_frames:
     df = condense_df(df, num_frames)
+  
+  return df
 
 def condense_df(df, num_frames):
  
@@ -122,4 +124,3 @@ def rand_colors(num_colors, min_val=0, max_val=1):
     return colors
 
 main()
-© 2020 GitHub, Inc.
