@@ -3,15 +3,35 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
-import tkinter
-from tkinter import * 
+from tkinter import Tk, filedialog, Label, Button, Entry, StringVar, font
 
 def main():
-
-  window = tkinter.Tk()
+  window = Tk()
   window.title("Bar Chart Racer")
-  # add widgets here
+
+  # upload csv
+  DEFAULT_FILENAME = "sample.csv"
+  filename = StringVar()
+  filename.set(DEFAULT_FILENAME)
+  
+  LABEL_WIDTH = 30 # characters 
+  file_label = Label(textvariable=filename, bg='white', width=LABEL_WIDTH,\
+    wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
+  file_label.grid(row=0, column=1, columnspan=2)
+  select_csv = Button(text="select csv", command=lambda: get_csv(window, filename))
+
+  select_csv.grid(row=1, column=1)
+  reset_csv = Button(text="reset", command=lambda: filename.set(DEFAULT_FILENAME)) 
+  reset_csv.grid(row=1, column=2)
+
   window.mainloop()
+
+def get_csv(window, filename_var):
+  selected_filename = filedialog.askopenfilename(parent=window,\
+    title="Choose your data", filetypes=[("csv files", ".csv")])
+  if selected_filename:
+    filename_var.set(selected_filename)
+
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name)
@@ -22,7 +42,8 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if is_date:
     df = df.reset_index()    
-    df[index_col_name] =  df[index_col_name].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+    df[index_col_name] =  df[index_col_name].apply(lambda x:\
+      int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
     df = df.set_index(index_col_name)
 
   # this only works right if the data is already sorted
@@ -40,11 +61,11 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   if row_num < num_frames:
     df = expand_df(df, num_frames)
   elif row_num > num_frames:
-    df =condense_df(df, frame_num)
+    df = condense_df(df, num_frames)
 
   return df
 
-def condense_df(df, frame_num):
+def condense_df(df, num_frames):
  
   dfempty = pd.DataFrame()
 
