@@ -14,24 +14,26 @@ def main():
   filename = StringVar()
   filename.set(DEFAULT_FILENAME)
   
-  LABEL_WIDTH = 30 # characters 
+  LABEL_WIDTH = 30 # characters
   file_label = Label(textvariable=filename, bg='white', width=LABEL_WIDTH,\
     wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
   file_label.grid(row=0, column=1, columnspan=2)
-  select_csv = Button(text="select csv", command=lambda: get_csv(window, filename))
 
-  select_csv.grid(row=1, column=1)
-  reset_csv = Button(text="reset", command=lambda: filename.set(DEFAULT_FILENAME)) 
-  reset_csv.grid(row=1, column=2)
+  select_csv_btn = Button(text="select csv", command=lambda: select_csv(window, filename))
+  select_csv_btn.grid(row=1, column=1)
+
+  reset_csv_btn = Button(text="reset", command=lambda: filename.set(DEFAULT_FILENAME)) 
+  reset_csv_btn.grid(row=1, column=2)
 
   window.mainloop()
 
-def get_csv(window, filename_var):
+def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
     title="Choose your data", filetypes=[("csv files", ".csv")])
+  
+  # only set if file was selected
   if selected_filename:
     filename_var.set(selected_filename)
-
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name)
