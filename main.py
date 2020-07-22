@@ -3,15 +3,15 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
+import tkinter
 from tkinter import * 
 
 def main():
-  
-  # put input part here
 
-  # df = process_data('cases_by_country.csv', 100, True, "%d/%m/%Y")
-  df = process_data('sample.csv', 1000)
-  animate_df(df)
+  window = tkinter.Tk()
+  window.title("Bar Chart Racer")
+  # add widgets here
+  window.mainloop()
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name)
@@ -39,10 +39,10 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
-  elif row_num> > num_frames:
+  elif row_num > num_frames:
     df =condense_df(df, frame_num)
 
-    return df
+  return df
 
 def condense_df(df, frame_num):
  
@@ -69,7 +69,6 @@ def expand_df(df, num_frames):
   df = df.set_index(df.columns[0])
 
   return df
-
 
 def animate_df(df):
   num_bars = len(df.columns)
