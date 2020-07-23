@@ -3,12 +3,17 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
-from tkinter import Tk, filedialog, Label, Button, Entry, StringVar, font
+from tkinter import *
 
 def main():
   window = Tk()
   window.title("Bar Chart Racer")
-
+  
+  #slider
+  master = Tk()
+  w = Scale(master, from_=0, to=1000, orient = HORIZONTAL)
+  w.pack()
+   
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
   filename = StringVar()
@@ -26,6 +31,9 @@ def main():
   reset_csv_btn.grid(row=1, column=2)
 
   window.mainloop()
+
+  df = process_data('sample.csv', 1000)
+  animate_df(df)
 
 def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
@@ -72,10 +80,8 @@ def condense_df(df, num_frames):
   dfempty = pd.DataFrame()
 
   for i in range(0, len(df) + 1, 2):
-    print(df.iloc[i])
     dfempty = dfempty.append(df.iloc[i])
     
-  print(dfempty)
   return dfempty
 
 def expand_df(df, num_frames):
@@ -127,12 +133,12 @@ def animate_df(df):
   plt.show()
 
 def rand_colors(num_colors, min_val=0, max_val=1):
-  colors = []
-  for i in range(num_colors):
-    r = random.uniform(min_val, max_val)
-    g = random.uniform(min_val, max_val)
-    b = random.uniform(min_val, max_val)
-    colors.append((r, g, b))
-  return colors
+    colors = []
+    for i in range(num_colors):
+      r = random.uniform(min_val, max_val)
+      g = random.uniform(min_val, max_val)
+      b = random.uniform(min_val, max_val)
+      colors.append((r, g, b))
+    return colors
 
 main()
