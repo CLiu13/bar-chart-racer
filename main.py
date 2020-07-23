@@ -128,10 +128,10 @@ def animate_df(df):
     
     ax.set_xlim(left=x_min, right=x_max)
     ax.barh(rank, values, tick_label=categories, color=colors)
-    plt.title('Animated Bar Racer Chart')
+    plt.title(e1.get())
 
-    plt.ylabel('Categories')
-    plt.xlabel('Amount')
+    plt.ylabel(e2.get())
+    plt.xlabel(e3.get())
 
   graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
