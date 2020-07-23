@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animate
 import random
 import datetime
-from tkinter import * 
 
 def main():
   
