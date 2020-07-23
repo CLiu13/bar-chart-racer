@@ -3,16 +3,15 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
-from tkinter import *
+from tkinter import Tk, Scale, StringVar, Label, Button, font, filedialog
 
 def main():
   window = Tk()
   window.title("Bar Chart Racer")
   
   #slider
-  master = Tk()
-  w = Scale(master, from_=0, to=1000, orient = HORIZONTAL)
-  w.pack()
+  w = Scale(window, from_=0, to=1000, orient='horizontal')
+  w.grid(row=2, column=1, columnspan=2)
    
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
@@ -24,16 +23,20 @@ def main():
     wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
   file_label.grid(row=0, column=1, columnspan=2)
 
-  select_csv_btn = Button(text="select csv", command=lambda: select_csv(window, filename))
+  select_csv_btn = Button(text="select csv", command=lambda:\
+    select_csv(window, filename))
   select_csv_btn.grid(row=1, column=1)
 
-  reset_csv_btn = Button(text="reset", command=lambda: filename.set(DEFAULT_FILENAME)) 
+  reset_csv_btn = Button(text="reset", command=lambda:\
+    filename.set(DEFAULT_FILENAME)) 
   reset_csv_btn.grid(row=1, column=2)
 
-  window.mainloop()
+  # run button
+  run_btn = Button(text="run", command=lambda:\
+    animate_df(process_data(filename.get(), w.get())))
+  run_btn.grid(row=3, columnspan=2)
 
-  df = process_data('sample.csv', 1000)
-  animate_df(df)
+  window.mainloop()
 
 def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
