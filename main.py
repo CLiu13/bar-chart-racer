@@ -1,32 +1,30 @@
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+#import matplotlib.pyplot as plt
+#import matplotlib.animation as animate
 import random
 import datetime
-<<<<<<< HEAD
-=======
-import tkinter
-from tkinter import * 
->>>>>>> 237e9882ebed9cb8c5e3f8243e7d7a5343bd126d
+from tkinter import *
 
 def main():
+  
+  # put input part here
 
-  window = tkinter.Tk()
-  window.title("Bar Chart Racer")
-  # add widgets here
-  window.mainloop()
+  # df = process_data('cases_by_country.csv', 100, True, "%d/%m/%Y")
+  df = process_data('sample.csv', 1000)
+  animate_df(df)
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
-  df = pd.read_csv(file_name)
-  index_col_name = df.columns[0]
-  df = df.set_index(index_col_name)
+  df = pd.read_csv(file_name, index_col='Date')
   
   df = df.fillna(value=0)
 
   if is_date:
-    df = df.reset_index()    
-    df[index_col_name] =  df[index_col_name].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
-    df = df.set_index(index_col_name)
+    df = df.reset_index()
+    
+    df['Date'] =  df['Date'].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+    print(df.index)
+    df = df.set_index('Date')
+    print(df.index)
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
@@ -39,13 +37,14 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   df = df.interpolate()
 
   row_num = df.index.size
+  print(row_num)
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
   elif row_num > num_frames:
     df =condense_df(df, frame_num)
 
-  return df
+    return df
 
 def condense_df(df, frame_num):
  
@@ -69,12 +68,18 @@ def expand_df(df, num_frames):
   df = df.reindex(indices)
   df = df.interpolate()
 
-  df = df.set_index(df.columns[0])
+  df = df.set_index('Date')
 
   return df
 
+#slider
+master = Tk()
+w = Scale(master, from_=0, to=1000, orient = HORIZONTAL)
+w.pack()
+mainloop()
+
 def animate_df(df):
-  num_bars = len(df.columns)
+  num_bars = len(df.iloc[0])
   colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
   max_bar = df.max().max()
@@ -102,17 +107,27 @@ def animate_df(df):
     plt.ylabel('Categories')
     plt.xlabel('Amount')
 
-  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
+  animation = animate.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
   plt.show()
 
 def rand_colors(num_colors, min_val=0, max_val=1):
-  colors = []
-  for i in range(num_colors):
-    r = random.uniform(min_val, max_val)
-    g = random.uniform(min_val, max_val)
-    b = random.uniform(min_val, max_val)
-    colors.append((r, g, b))
-  return colors
+    # input validation
+    if min_val < 0 or min_val > 1:
+      min_val = 0
+    if max_val < 0 or max_val > 1:
+      max_val = 1
+    if min_val > max_val:
+      temp = min_val
+      min_val = max_val
+      max_val = temp
+    
+    colors = []
+    for i in range(num_colors):
+      r = random.uniform(min_val, max_val)
+      g = random.uniform(min_val, max_val)
+      b = random.uniform(min_val, max_val)
+      colors.append((r, g, b))
+    return colors
 
 main()
