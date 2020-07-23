@@ -9,6 +9,38 @@ def main():
   window = Tk()
   window.title("Bar Chart Racer")
   
+  #titles
+  
+  import tkinter as tk
+
+  def show_entry_fields():
+    print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (e1.get(), e2.get(), e3.get()))
+    e1.delete(0, tk.END)
+    e2.delete(0, tk.END)
+    e3.delete(0, tk.END)
+
+  master = tk.Tk()
+  tk.Label(master, text="Chart title").grid(row=0)
+  tk.Label(master, text="Y-axis label").grid(row=1)
+  tk.Label(master, text="X-axis label").grid(row=2)
+
+  e1 = tk.Entry(master)
+  e1.insert(10, "Animated Bar Racer Chart")
+  e2 = tk.Entry(master)
+  e2.insert(10, "Amount")
+  e3 = tk.Entry(master)
+  e3.insert(10, "Categories")
+
+  e1.grid(row=0, column=1)
+  e2.grid(row=1, column=1)
+  e3.grid(row=2, column=1)
+        
+  tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, sticky=tk.W, pady=4)
+
+  tk.Button(master, text='Show', command=show_entry_fields).grid(row=3, column=1, sticky=tk.W, pady=4)
+
+  tk.mainloop()
+  
   #slider
   w = Scale(window, from_=10, to=1000, orient='horizontal')
   w.grid(row=2, column=1, columnspan=2)
