@@ -3,7 +3,8 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
-from tkinter import Tk, Scale, StringVar, Label, Button, font, filedialog
+from tkinter import *
+from tkinter import font, filedialog
 
 def main():
   window = Tk()
@@ -11,36 +12,32 @@ def main():
   
   #titles
   def show_entry_fields():
-    print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (e1.get(), e2.get(), e3.get()))
-    e1.delete(0, tk.END)
-    e2.delete(0, tk.END)
-    e3.delete(0, tk.END)
+    print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (chart_title.get(), y_axis.get(), x_axis.get()))
+    chart_title.delete(0, END)
+    y_axis.delete(0, END)
+    x_axis.delete(0, END)
 
-  master = tk.Tk()
-  tk.Label(master, text="Chart title").grid(row=0)
-  tk.Label(master, text="Y-axis label").grid(row=1)
-  tk.Label(master, text="X-axis label").grid(row=2)
+  Label(window, text="Chart title").grid(row=2)
+  Label(window, text="Y-axis label").grid(row=3)
+  Label(window, text="X-axis label").grid(row=4)
 
-  e1 = tk.Entry(master)
-  e1.insert(10, "Animated Bar Racer Chart")
-  e2 = tk.Entry(master)
-  e2.insert(10, "Amount")
-  e3 = tk.Entry(master)
-  e3.insert(10, "Categories")
+  chart_title = Entry(window)
+  chart_title.insert(10, "Animated Bar Racer Chart")
+  y_axis = Entry(window)
+  y_axis.insert(10, "Amount")
+  x_axis = Entry(window)
+  x_axis.insert(10, "Categories")
 
-  e1.grid(row=0, column=1)
-  e2.grid(row=1, column=1)
-  e3.grid(row=2, column=1)
+  chart_title.grid(row=2, column=1)
+  y_axis.grid(row=3, column=1)
+  x_axis.grid(row=4, column=1)
         
-  tk.Button(master, text='Quit', command=master.quit).grid(row=3, column=0, sticky=tk.W, pady=4)
-
-  tk.Button(master, text='Show', command=show_entry_fields).grid(row=3, column=1, sticky=tk.W, pady=4)
-
-  tk.mainloop()
+  Button(window, text='Show', command=show_entry_fields).grid(row=4, column=2, sticky=W, pady=4)
   
   #slider
+  Label(window, text="Frame count").grid(row=5, column=0)
   w = Scale(window, from_=10, to=1000, orient='horizontal')
-  w.grid(row=2, column=1, columnspan=2)
+  w.grid(row=5, column=1, columnspan=2)
    
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
@@ -52,18 +49,18 @@ def main():
     wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
   file_label.grid(row=0, column=1, columnspan=2)
 
-  select_csv_btn = Button(text="select csv", command=lambda:\
+  select_csv_btn = Button(text="Select csv", command=lambda:\
     select_csv(window, filename))
   select_csv_btn.grid(row=1, column=1)
 
-  reset_csv_btn = Button(text="reset", command=lambda:\
+  reset_csv_btn = Button(text="Reset", command=lambda:\
     filename.set(DEFAULT_FILENAME)) 
-  reset_csv_btn.grid(row=1, column=2)
+  reset_csv_btn.grid(row=1, column=2, sticky=W, pady=4)
 
   # run button
-  run_btn = Button(text="run", command=lambda:\
-    animate_df(process_data(filename.get(), w.get()), e1.get(), e2.get(), e3.get()))
-  run_btn.grid(row=3, columnspan=2)
+  run_btn = Button(text="Plot", command=lambda:\
+    animate_df(process_data(filename.get(), w.get()), chart_title.get(), y_axis.get(), x_axis.get()))
+  run_btn.grid(row=10, columnspan=2)
 
   window.mainloop()
 
