@@ -1,30 +1,60 @@
 import pandas as pd
-#import matplotlib.pyplot as plt
-#import matplotlib.animation as animate
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 import random
 import datetime
 from tkinter import *
 
 def main():
+  window = Tk()
+  window.title("Bar Chart Racer")
   
-  # put input part here
+  #slider
+  master = Tk()
+  w = Scale(master, from_=0, to=1000, orient = HORIZONTAL)
+  w.pack()
+   
+  # upload csv
+  DEFAULT_FILENAME = "sample.csv"
+  filename = StringVar()
+  filename.set(DEFAULT_FILENAME)
+  
+  LABEL_WIDTH = 30 # characters
+  file_label = Label(textvariable=filename, bg='white', width=LABEL_WIDTH,\
+    wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
+  file_label.grid(row=0, column=1, columnspan=2)
 
-  # df = process_data('cases_by_country.csv', 100, True, "%d/%m/%Y")
+  select_csv_btn = Button(text="select csv", command=lambda: select_csv(window, filename))
+  select_csv_btn.grid(row=1, column=1)
+
+  reset_csv_btn = Button(text="reset", command=lambda: filename.set(DEFAULT_FILENAME)) 
+  reset_csv_btn.grid(row=1, column=2)
+
+  window.mainloop()
+
   df = process_data('sample.csv', 1000)
   animate_df(df)
 
+def select_csv(window, filename_var):
+  selected_filename = filedialog.askopenfilename(parent=window,\
+    title="Choose your data", filetypes=[("csv files", ".csv")])
+  
+  # only set if file was selected
+  if selected_filename:
+    filename_var.set(selected_filename)
+
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
-  df = pd.read_csv(file_name, index_col='Date')
+  df = pd.read_csv(file_name)
+  index_col_name = df.columns[0]
+  df = df.set_index(index_col_name)
   
   df = df.fillna(value=0)
 
   if is_date:
-    df = df.reset_index()
-    
-    df['Date'] =  df['Date'].apply(lambda x: int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
-    print(df.index)
-    df = df.set_index('Date')
-    print(df.index)
+    df = df.reset_index()    
+    df[index_col_name] =  df[index_col_name].apply(lambda x:\
+      int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+    df = df.set_index(index_col_name)
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
@@ -37,24 +67,21 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   df = df.interpolate()
 
   row_num = df.index.size
-  print(row_num)
 
   if row_num < num_frames:
     df = expand_df(df, num_frames)
   elif row_num > num_frames:
-    df =condense_df(df, frame_num)
+    df = condense_df(df, num_frames)
 
-    return df
+  return df
 
-def condense_df(df, frame_num):
+def condense_df(df, num_frames):
  
   dfempty = pd.DataFrame()
 
   for i in range(0, len(df) + 1, 2):
-    print(df.iloc[i])
     dfempty = dfempty.append(df.iloc[i])
     
-  print(dfempty)
   return dfempty
 
 def expand_df(df, num_frames):
@@ -68,18 +95,12 @@ def expand_df(df, num_frames):
   df = df.reindex(indices)
   df = df.interpolate()
 
-  df = df.set_index('Date')
+  df = df.set_index(df.columns[0])
 
   return df
 
-#slider
-master = Tk()
-w = Scale(master, from_=0, to=1000, orient = HORIZONTAL)
-w.pack()
-mainloop()
-
 def animate_df(df):
-  num_bars = len(df.iloc[0])
+  num_bars = len(df.columns)
   colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
   max_bar = df.max().max()
@@ -107,21 +128,11 @@ def animate_df(df):
     plt.ylabel('Categories')
     plt.xlabel('Amount')
 
-  animation = animate.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
+  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
   plt.show()
 
 def rand_colors(num_colors, min_val=0, max_val=1):
-    # input validation
-    if min_val < 0 or min_val > 1:
-      min_val = 0
-    if max_val < 0 or max_val > 1:
-      max_val = 1
-    if min_val > max_val:
-      temp = min_val
-      min_val = max_val
-      max_val = temp
-    
     colors = []
     for i in range(num_colors):
       r = random.uniform(min_val, max_val)
