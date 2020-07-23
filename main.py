@@ -10,7 +10,7 @@ def main():
   window.title("Bar Chart Racer")
   
   #slider
-  w = Scale(window, from_=0, to=1000, orient='horizontal')
+  w = Scale(window, from_=10, to=1000, orient='horizontal')
   w.grid(row=2, column=1, columnspan=2)
    
   # upload csv
@@ -79,20 +79,22 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   return df
 
 def condense_df(df, num_frames):
- 
-  dfempty = pd.DataFrame()
+  row_num = df.index.size
+  step = round(row_num / num_frames)
 
-  for i in range(0, len(df) + 1, 2):
+  dfempty = pd.DataFrame()
+  for i in range(0, len(df) + 1, step):
     dfempty = dfempty.append(df.iloc[i])
     
   return dfempty
 
 def expand_df(df, num_frames):
-  step = num_frames // df.index.size
+  row_num = df.index.size
+  step = round(num_frames / row_num)
 
   # rescale - when number of rows is too small 
   df = df.reset_index() # remove date as our index column
-  new_idx = pd.Series(range(step, num_frames + 1, step)) 
+  new_idx = pd.Series(range(step, step * row_num + 1, step)) 
   df = df.set_index(new_idx)
   indices = range(new_idx[0], new_idx[len(new_idx) - 1] + 1)
   df = df.reindex(indices)
