@@ -10,9 +10,6 @@ def main():
   window.title("Bar Chart Racer")
   
   #titles
-  
-  import tkinter as tk
-
   def show_entry_fields():
     print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (e1.get(), e2.get(), e3.get()))
     e1.delete(0, tk.END)
@@ -65,7 +62,7 @@ def main():
 
   # run button
   run_btn = Button(text="run", command=lambda:\
-    animate_df(process_data(filename.get(), w.get())))
+    animate_df(process_data(filename.get(), w.get()), e1.get(), e2.get(), e3.get()))
   run_btn.grid(row=3, columnspan=2)
 
   window.mainloop()
@@ -136,7 +133,7 @@ def expand_df(df, num_frames):
 
   return df
 
-def animate_df(df):
+def animate_df(df, title, ylabel, xlabel):
   num_bars = len(df.columns)
   colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
@@ -160,10 +157,10 @@ def animate_df(df):
     
     ax.set_xlim(left=x_min, right=x_max)
     ax.barh(rank, values, tick_label=categories, color=colors)
-    plt.title(e1.get())
+    plt.title(title)
 
-    plt.ylabel(e2.get())
-    plt.xlabel(e3.get())
+    plt.ylabel(ylabel)
+    plt.xlabel(xlabel)
 
   graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
