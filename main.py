@@ -5,11 +5,13 @@ import random
 import datetime
 from tkinter import *
 from tkinter import font, filedialog
+from tkinter import tix
 
 def main():
-  window = Tk()
+
+  window = tix.Tk()
   window.title("Bar Chart Racer")
-  
+
   #titles
   def show_entry_fields():
     print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (chart_title.get(), y_axis.get(), x_axis.get()))
@@ -17,9 +19,9 @@ def main():
     y_axis.delete(0, END)
     x_axis.delete(0, END)
 
-  Label(window, text="Chart title").grid(row=2)
-  Label(window, text="Y-axis label").grid(row=3)
-  Label(window, text="X-axis label").grid(row=4)
+  Label(window, text="Chart title").grid(row=2, column=1)
+  Label(window, text="Y-axis label").grid(row=3, column=1)
+  Label(window, text="X-axis label").grid(row=4, column=1)
 
   chart_title = Entry(window)
   chart_title.insert(10, "Animated Bar Racer Chart")
@@ -28,16 +30,31 @@ def main():
   x_axis = Entry(window)
   x_axis.insert(10, "Categories")
 
-  chart_title.grid(row=2, column=1)
-  y_axis.grid(row=3, column=1)
-  x_axis.grid(row=4, column=1)
+  chart_title.grid(row=2, column=2)
+  y_axis.grid(row=3, column=2)
+  x_axis.grid(row=4, column=2)
         
-  Button(window, text='Show', command=show_entry_fields).grid(row=4, column=2, sticky=W, pady=4)
+  Button(window, text='Show', command=show_entry_fields).grid(row=4, column=3, sticky=W, pady=4)
+
+  # enable/disable parse dates
+  is_date = BooleanVar()
+  date_checkbox = Checkbutton(window, text="Parse time column as date, " +\
+    "using format string below", wraplength=150, variable=is_date,\
+    justify=LEFT, onvalue=True, offvalue=False)
+  date_checkbox.grid(row=5, column=2)
+
+  date_format = Entry(window)
+  date_format.grid(row=6, column=2)
   
+  date_info = tix.Balloon(window)
+  date_info.bind_widget(date_format, balloonmsg="Use %m for month, " +\
+    "%d for day, %Y for year. For example, 12/31/1999 would have the format" +\
+    " string %m/%d/%Y")
+
   #slider
-  Label(window, text="Frame count").grid(row=5, column=0)
+  Label(window, text="Frame count").grid(row=7, column=1)
   w = Scale(window, from_=10, to=1000, orient='horizontal')
-  w.grid(row=5, column=1, columnspan=2)
+  w.grid(row=7, column=2, columnspan=2)
    
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
@@ -47,20 +64,21 @@ def main():
   LABEL_WIDTH = 30 # characters
   file_label = Label(textvariable=filename, bg='white', width=LABEL_WIDTH,\
     wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
-  file_label.grid(row=0, column=1, columnspan=2)
+  file_label.grid(row=0, column=2, columnspan=2)
 
   select_csv_btn = Button(text="Select csv", command=lambda:\
     select_csv(window, filename))
-  select_csv_btn.grid(row=1, column=1)
+  select_csv_btn.grid(row=1, column=2)
 
   reset_csv_btn = Button(text="Reset", command=lambda:\
     filename.set(DEFAULT_FILENAME)) 
-  reset_csv_btn.grid(row=1, column=2, sticky=W, pady=4)
+  reset_csv_btn.grid(row=1, column=3)
 
   # run button
   run_btn = Button(text="Plot", command=lambda:\
-    animate_df(process_data(filename.get(), w.get()), chart_title.get(), y_axis.get(), x_axis.get()))
-  run_btn.grid(row=10, columnspan=2)
+    animate_df(process_data(filename.get(), w.get(), is_date.get(), date_format.get()),\
+      chart_title.get(), y_axis.get(), x_axis.get()))
+  run_btn.grid(row=8, columnspan=3)
 
   window.mainloop()
 
@@ -141,7 +159,7 @@ def animate_df(df, title, ylabel, xlabel):
   x_min = min_bar - (max_bar - min_bar) * 0.01
   
   fig = plt.figure()
-  
+
   # note - maybe we could make this a function outside of this one?
   def draw_graph(frame):
     ax = plt.axes(label=str(frame))
@@ -154,8 +172,8 @@ def animate_df(df, title, ylabel, xlabel):
     
     ax.set_xlim(left=x_min, right=x_max)
     ax.barh(rank, values, tick_label=categories, color=colors)
-    plt.title(title)
 
+    plt.title(title)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
 
