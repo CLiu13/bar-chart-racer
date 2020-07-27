@@ -81,9 +81,9 @@ def main():
 
   # plot button
   run_btn = Button(text="Plot", command=lambda:\
-    animate_df(process_data(filename.get(), w.get(), is_date.get(), date_format.get()),\
-      chart_title.get(), y_axis.get(), x_axis.get()))
-  run_btn.grid(row=8, column=2)
+    animate_df(process_data(filename.get(), fslide.get(), is_date.get(),\
+      date_format.get()), chart_title.get(), y_axis.get(), x_axis.get()))
+  run_btn.grid(row=9, column=2)
   
   global graph_animation
 
@@ -92,7 +92,7 @@ def main():
 
   # save button
   save_btn = Button(window, text="Save as", command=lambda: save_animation(window))
-  save_btn.grid(row=8, column=3)
+  save_btn.grid(row=9, column=3)
 
   window.mainloop()
 
