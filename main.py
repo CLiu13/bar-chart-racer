@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 import random
 import datetime
 from tkinter import *
+
 def main():
 
   window = tix.Tk()
@@ -30,7 +31,7 @@ def main():
   chart_title.grid(row=2, column=2)
   y_axis.grid(row=3, column=2)
   x_axis.grid(row=4, column=2)
-        
+
   Button(window, text='Show', command=show_entry_fields).grid(row=4, column=3, sticky=W, pady=4)
 
   # enable/disable parse dates
@@ -57,13 +58,14 @@ def main():
   Label(window, text ="Number of bars").grid(row=8, column=1)
   bslide = Scale(window, from_=1, to=20, orient = 'horizontal')
   bslide.grid(row = 8, column=2, columnspan=2)
-   
+
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
   filename = StringVar()
   filename.set(DEFAULT_FILENAME)
-  
-  LABEL_WIDTH = 30 # characters
+
+  # characters
+  LABEL_WIDTH = 30
   file_label = Label(textvariable=filename, bg='white', width=LABEL_WIDTH,\
     wraplength=LABEL_WIDTH*font.Font(font='TkDefaultFont').measure(text="0"))
   file_label.grid(row=0, column=2, columnspan=2)
@@ -87,7 +89,7 @@ def main():
 def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
     title="Choose your data", filetypes=[("csv files", ".csv")])
-  
+
   # only set if file was selected
   if selected_filename:
     filename_var.set(selected_filename)
@@ -100,8 +102,8 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
   df = df.fillna(value=0)
 
   if is_date:
-    df = df.reset_index()    
-    df[index_col_name] =  df[index_col_name].apply(lambda x:\
+    df = df.reset_index()
+    df[index_col_name] = df[index_col_name].apply(lambda x:\
       int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
     df = df.set_index(index_col_name)
 
@@ -131,15 +133,16 @@ def condense_df(df, num_frames):
   dfempty = pd.DataFrame()
   for i in range(0, len(df) + 1, step):
     dfempty = dfempty.append(df.iloc[i])
-    
+
   return dfempty
 
 def expand_df(df, num_frames):
   row_num = df.index.size
   step = round(num_frames / row_num)
 
-  # rescale - when number of rows is too small 
-  df = df.reset_index() # remove date as our index column
+  # rescale - when number of rows is too small
+  # remove date as our index column
+  df = df.reset_index()
   new_idx = pd.Series(range(step, step * row_num + 1, step)) 
   df = df.set_index(new_idx)
   indices = range(new_idx[0], new_idx[len(new_idx) - 1] + 1)
@@ -152,26 +155,28 @@ def expand_df(df, num_frames):
 
 def animate_df(df, title, ylabel, xlabel):
   num_bars = len(df.columns)
-  colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
+  colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
   max_bar = df.max().max()
   min_bar = df.min().min()
 
   x_max = max_bar + (max_bar - min_bar) * 0.05
   x_min = min_bar - (max_bar - min_bar) * 0.01
-  
+
   fig = plt.figure()
 
   # note - maybe we could make this a function outside of this one?
   def draw_graph(frame):
     ax = plt.axes(label=str(frame))
-    
-    series        = df.iloc[frame] #selects ith row
-    rank          = series.rank(method='first')
+
+    #selects ith row
+    series = df.iloc[frame]
+    rank = series.rank(method='first')
     # to do: only show certain max number of bars
-    categories    = series.index
-    values        = series.array # y-axis
-    
+    categories = series.index
+    # y-axis
+    values = series.array
+
     ax.set_xlim(left=x_min, right=x_max)
     ax.barh(rank, values, tick_label=categories, color=colors)
 
