@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 import random
 import datetime
 from tkinter import *
+from tkinter import tix, filedialog, font, messagebox
 
 def main():
 
@@ -82,7 +83,16 @@ def main():
   run_btn = Button(text="Plot", command=lambda:\
     animate_df(process_data(filename.get(), w.get(), is_date.get(), date_format.get()),\
       chart_title.get(), y_axis.get(), x_axis.get()))
-  run_btn.grid(row=9, columnspan=3)
+  run_btn.grid(row=8, column=2)
+  
+  global graph_animation
+
+  # ensure that the variable is defined
+  graph_animation = None
+
+  # save button
+  save_btn = Button(window, text="Save as", command=lambda: save_animation(window))
+  save_btn.grid(row=8, column=3)
 
   window.mainloop()
 
@@ -93,6 +103,23 @@ def select_csv(window, filename_var):
   # only set if file was selected
   if selected_filename:
     filename_var.set(selected_filename)
+
+def save_animation(window):
+  if not graph_animation:
+    messagebox.showwarning("No animation", "You cannot save until " +\
+      "you have run the animation.")
+  else:
+    filename = filedialog.asksaveasfilename(parent=window,\
+      title="Choose save location", filetypes=[("gif", ".gif"), ("mp4", ".mp4")],\
+        defaultextension=".gif")
+    writer = 'ffmpeg'
+    print(filename)
+    if filename:
+      if filename.endswith('gif'):
+        writer = animation.PillowWriter()
+      elif not filename.endswith('mp4'):
+        filename += ".gif"
+      graph_animation.save(filename, writer=writer)
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name)
@@ -184,6 +211,7 @@ def animate_df(df, title, ylabel, xlabel):
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
 
+  global graph_animation
   graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
 
   plt.show()
