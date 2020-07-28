@@ -3,15 +3,21 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import random
 import datetime
+import traceback
 from tkinter import *
 from tkinter import tix, filedialog, font, messagebox
 
+# determine whether to print caught exceptions
+DEBUG = False
+
 def main():
+
+  # allows us to handle exceptions thrown by tkinter
+  Tk.report_callback_exception = show_error
 
   window = tix.Tk()
   window.title("Bar Chart Racer")
 
-  #titles
   def show_entry_fields():
     print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (chart_title.get(), y_axis.get(), x_axis.get()))
     chart_title.delete(0, END)
@@ -81,8 +87,8 @@ def main():
 
   # plot button
   run_btn = Button(text="Plot", command=lambda:\
-    animate_df(process_data(filename.get(), fslide.get(), is_date.get(),\
-      date_format.get()), chart_title.get(), y_axis.get(), x_axis.get()))
+    run_animation(filename.get(), fslide.get(), is_date.get(), date_format.get(),\
+      chart_title.get(), y_axis.get(), x_axis.get()))
   run_btn.grid(row=9, column=2)
   
   global graph_animation
@@ -95,6 +101,27 @@ def main():
   save_btn.grid(row=9, column=3)
 
   window.mainloop()
+
+def show_error(*args):
+  if DEBUG:
+    traceback.print_exc()
+  messagebox.showerror("An error occurred", "Please try again.")
+  
+def run_animation(filename, num_frames, is_date, format_string,\
+  chart_title, y_label, x_label):
+  
+  dataframe = process_data(filename, num_frames, is_date, format_string)
+  if dataframe is not None:
+    animation_successful = animate_df(dataframe, chart_title, y_label, x_label)
+    if not animation_successful:
+      messagebox.showerror("Unable to create animation", "There was an issue " +\
+        "while creating your animation. Please try again.")
+  else:
+    messagebox.showerror("Unable to process your data", "Check that your " +\
+      "file is in the correct format. The first column should be the time - " +\
+      "either an integer or a date (you must provide the format of the date " +\
+      "for it to be processed correctly). The top row should contain your " +\
+      "category names.")
 
 def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
@@ -109,49 +136,59 @@ def save_animation(window):
     messagebox.showwarning("No animation", "You cannot save until " +\
       "you have run the animation.")
   else:
-    filename = filedialog.asksaveasfilename(parent=window,\
-      title="Choose save location", filetypes=[("gif", ".gif"), ("mp4", ".mp4")],\
-        defaultextension=".gif")
-    writer = 'ffmpeg'
-    print(filename)
-    if filename:
-      if filename.endswith('gif'):
-        writer = animation.PillowWriter()
-      elif not filename.endswith('mp4'):
-        filename += ".gif"
-      graph_animation.save(filename, writer=writer)
+    try:
+      filename = filedialog.asksaveasfilename(parent=window,\
+        title="Choose save location", filetypes=[("gif", ".gif"), ("mp4", ".mp4")],\
+          defaultextension=".gif")
+      writer = 'ffmpeg'
+      if filename:
+        if filename.endswith('gif'):
+          writer = animation.PillowWriter()
+        elif not filename.endswith('mp4'):
+          filename += ".gif"
+        graph_animation.save(filename, writer=writer)
+    except:
+      messagebox.showerror("Unable to save animation", "There was an issue " +\
+        "saving your animation. Make sure you entered a valid filename and " +\
+        "that the animation you want to save is still running.")
+      if DEBUG:
+        traceback.print_exc()
 
 def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
-  df = pd.read_csv(file_name)
-  index_col_name = df.columns[0]
-  df = df.set_index(index_col_name)
-  
-  df = df.fillna(value=0)
-
-  if is_date:
-    df = df.reset_index()
-    df[index_col_name] = df[index_col_name].apply(lambda x:\
-      int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+  try:
+    df = pd.read_csv(file_name)
+    index_col_name = df.columns[0]
     df = df.set_index(index_col_name)
+    
+    df = df.fillna(value=0)
 
-  # this only works right if the data is already sorted
-  first_idx = df.index[0]
-  last_idx = df.index[len(df.index) - 1]
+    if is_date:
+      df = df.reset_index()
+      df[index_col_name] = df[index_col_name].apply(lambda x:\
+        int(datetime.datetime.strptime(x, format_string).strftime("%Y%m%d")))
+      df = df.set_index(index_col_name)
 
-  # add one row for each year, this will not work
-  # well for every dataset (room for improvement here)
-  indices = range(first_idx, last_idx + 1)
-  df = df.reindex(indices)
-  df = df.interpolate()
+    # this only works right if the data is already sorted
+    first_idx = df.index[0]
+    last_idx = df.index[len(df.index) - 1]
 
-  row_num = df.index.size
+    # add one row for each year, this will not work
+    # well for every dataset (room for improvement here)
+    indices = range(first_idx, last_idx + 1)
+    df = df.reindex(indices)
+    df = df.interpolate()
 
-  if row_num < num_frames:
-    df = expand_df(df, num_frames)
-  elif row_num > num_frames:
-    df = condense_df(df, num_frames)
+    row_num = df.index.size
 
-  return df
+    if row_num < num_frames:
+      df = expand_df(df, num_frames)
+    elif row_num > num_frames:
+      df = condense_df(df, num_frames)
+
+    return df
+  except:
+    if DEBUG:
+      traceback.print_exc()
 
 def condense_df(df, num_frames):
   row_num = df.index.size
@@ -181,40 +218,48 @@ def expand_df(df, num_frames):
   return df
 
 def animate_df(df, title, ylabel, xlabel):
-  num_bars = len(df.columns)
-  colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
+  try:
+    num_bars = len(df.columns)
+    colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
-  max_bar = df.max().max()
-  min_bar = df.min().min()
+    max_bar = df.max().max()
+    min_bar = df.min().min()
 
-  x_max = max_bar + (max_bar - min_bar) * 0.05
-  x_min = min_bar - (max_bar - min_bar) * 0.01
+    x_max = max_bar + (max_bar - min_bar) * 0.05
+    x_min = min_bar - (max_bar - min_bar) * 0.01
 
-  fig = plt.figure()
+    fig, ax = plt.subplots()
 
-  # note - maybe we could make this a function outside of this one?
-  def draw_graph(frame):
-    ax = plt.axes(label=str(frame))
+    def draw_graph(frame):
+      # clear the current axes
+      plt.cla()
 
-    #selects ith row
-    series = df.iloc[frame]
-    rank = series.rank(method='first')
-    # to do: only show certain max number of bars
-    categories = series.index
-    # y-axis
-    values = series.array
+      # selects ith row
+      series = df.iloc[frame]
+      rank = series.rank(method='first')
+      # to do: only show certain max number of bars
+      categories = series.index
+      # y-axis
+      values = series.array
 
-    ax.set_xlim(left=x_min, right=x_max)
-    ax.barh(rank, values, tick_label=categories, color=colors)
+      ax.set_xlim(left=x_min, right=x_max)
+      ax.barh(rank, values, tick_label=categories, color=colors)
 
-    plt.title(title)
-    plt.ylabel(ylabel)
-    plt.xlabel(xlabel)
+      plt.title(title)
+      plt.ylabel(ylabel)
+      plt.xlabel(xlabel)
 
-  global graph_animation
-  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
+    global graph_animation
+    graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
+ 
+    plt.show()
+    
+    return True
 
-  plt.show()
+  except:
+    if DEBUG:
+      traceback.print_exc()
+    return False
 
 def rand_colors(num_colors, min_val=0, max_val=1):
     colors = []
