@@ -50,8 +50,8 @@ def main():
 
   #slider frame
   Label(window, text="Frame count").grid(row=7, column=1)
-  fslide = Scale(window, from_=10, to=1000, orient='horizontal')
-  fslide.grid(row=7, column=2, columnspan=2)
+  w = Scale(window, from_=10, to=1000, orient='horizontal')
+  w.grid(row=7, column=2, columnspan=2)
 
   # slider bars
   Label(window, text ="Number of bars").grid(row=8, column=1)
