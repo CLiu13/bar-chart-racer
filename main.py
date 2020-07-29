@@ -4,7 +4,7 @@ import matplotlib.animation as animation
 import random
 import datetime
 from tkinter import *
-from tkinter import tix, filedialog, font, messagebox
+from tkinter import tix, filedialog, font, messagebox, colorchooser
 
 def main():
 
@@ -93,6 +93,12 @@ def main():
   # save button
   save_btn = Button(window, text="Save as", command=lambda: save_animation(window))
   save_btn.grid(row=9, column=3)
+  
+  # color chooser 
+  def mcolor(): 
+    color = colorchooser.askcolor()
+    label = Label(text='your choosen color', bg=color[1]).pack()
+  button = Button(text="Choose color", width = 30, command= mcolor).pack()
 
   window.mainloop()
 
