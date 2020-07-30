@@ -103,7 +103,7 @@ def main():
   hex_color = StringVar()
   def mcolor(): 
     hex_color.set(colorchooser.askcolor()[1])
-    color_label = Label(text='your choosen color', bg=hex_color.get()).grid(row=9, column=3)
+    color_label = Label(text='your chosen color', bg=hex_color.get()).grid(row=9, column=3)
   button = Button(text="Choose color", width = 30, command= mcolor)
   button.grid(row=9, column=2)
   
