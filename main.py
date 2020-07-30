@@ -8,7 +8,7 @@ from tkinter import *
 from tkinter import tix, filedialog, font, messagebox, colorchooser
 
 # determine whether to print caught exceptions
-DEBUG = False
+DEBUG = True
 
 def main():
 
@@ -84,12 +84,6 @@ def main():
   reset_csv_btn = Button(text="Reset", command=lambda:\
     filename.set(DEFAULT_FILENAME)) 
   reset_csv_btn.grid(row=1, column=3)
-
-  # plot button
-  run_btn = Button(text="Plot", command=lambda:\
-    run_animation(filename.get(), fslide.get(), is_date.get(), date_format.get(),\
-      chart_title.get(), y_axis.get(), x_axis.get()))
-  run_btn.grid(row=9, column=2)
   
   global graph_animation
 
@@ -98,13 +92,27 @@ def main():
 
   # save button
   save_btn = Button(window, text="Save as", command=lambda: save_animation(window))
-  save_btn.grid(row=9, column=3)
+  save_btn.grid(row=10, column=3)
   
   # color chooser 
+  has_custom_color = BooleanVar()
+  color_checkbox = Checkbutton(window, text="Use custom color", variable=has_custom_color,\
+    onvalue=True, offvalue=False)
+  color_checkbox.grid(row=9, column=1)
+
+  hex_color = StringVar()
   def mcolor(): 
-    color = colorchooser.askcolor()
-    label = Label(text='your choosen color', bg=color[1]).pack()
-  button = Button(text="Choose color", width = 30, command= mcolor).pack()
+    hex_color.set(colorchooser.askcolor()[1])
+    color_label = Label(text='your choosen color', bg=hex_color.get()).grid(row=9, column=3)
+  button = Button(text="Choose color", width = 30, command= mcolor)
+  button.grid(row=9, column=2)
+  
+  # plot button
+  run_btn = Button(text="Plot", command=lambda:\
+    run_animation(filename.get(), fslide.get(), is_date.get(), date_format.get(),\
+      chart_title.get(), y_axis.get(), x_axis.get(), has_custom_color.get(), hex_color.get()))
+  run_btn.grid(row=10, column=2)
+  
 
   window.mainloop()
 
@@ -114,11 +122,12 @@ def show_error(*args):
   messagebox.showerror("An error occurred", "Please try again.")
   
 def run_animation(filename, num_frames, is_date, format_string,\
-  chart_title, y_label, x_label):
+  chart_title, y_label, x_label, has_custom_color, hex_color):
   
   dataframe = process_data(filename, num_frames, is_date, format_string)
   if dataframe is not None:
-    animation_successful = animate_df(dataframe, chart_title, y_label, x_label)
+    animation_successful = animate_df(dataframe, chart_title, y_label, x_label,\
+      has_custom_color, hex_color)
     if not animation_successful:
       messagebox.showerror("Unable to create animation", "There was an issue " +\
         "while creating your animation. Please try again.")
@@ -223,10 +232,12 @@ def expand_df(df, num_frames):
 
   return df
 
-def animate_df(df, title, ylabel, xlabel):
+def animate_df(df, title, ylabel, xlabel, has_custom_color, color_hex):
   try:
     num_bars = len(df.columns)
-    colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
+
+    if not has_custom_color:
+      colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
     max_bar = df.max().max()
     min_bar = df.min().min()
@@ -249,7 +260,10 @@ def animate_df(df, title, ylabel, xlabel):
       values = series.array
 
       ax.set_xlim(left=x_min, right=x_max)
-      ax.barh(rank, values, tick_label=categories, color=colors)
+      if has_custom_color:
+        ax.barh(rank, values, tick_label=categories, color=color_hex)
+      else:
+        ax.barh(rank, values, tick_label=categories, color=colors)
 
       plt.title(title)
       plt.ylabel(ylabel)
