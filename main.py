@@ -4,6 +4,11 @@ import matplotlib.animation as animation
 import random
 import datetime
 from tkinter import *
+from tkinter import font, filedialog
+from tkinter import tix
+import numpy as np
+from pandas import DataFrame
+
 def main():
 
   window = tix.Tk()
@@ -11,7 +16,7 @@ def main():
 
   #titles
   def show_entry_fields():
-    print("Chart title: %s\nY-axis label: %s\nX-axis label: %s" % (chart_title.get(), y_axis.get(), x_axis.get()))
+    print("Chart title: %s\nY-axis label: %s\nX-axis label: %s\nBar Number: %s" % (chart_title.get(), y_axis.get(), x_axis.get(), bslide.get()))
     chart_title.delete(0, END)
     y_axis.delete(0, END)
     x_axis.delete(0, END)
@@ -23,9 +28,9 @@ def main():
   chart_title = Entry(window)
   chart_title.insert(10, "Animated Bar Racer Chart")
   y_axis = Entry(window)
-  y_axis.insert(10, "Amount")
+  y_axis.insert(10, "Categories")
   x_axis = Entry(window)
-  x_axis.insert(10, "Categories")
+  x_axis.insert(10, "Amount")
 
   chart_title.grid(row=2, column=2)
   y_axis.grid(row=3, column=2)
@@ -53,11 +58,15 @@ def main():
   w = Scale(window, from_=10, to=1000, orient='horizontal')
   w.grid(row=7, column=2, columnspan=2)
 
-  # slider bars
+ # slider bars
   Label(window, text ="Number of bars").grid(row=8, column=1)
   bslide = Scale(window, from_=1, to=20, orient = 'horizontal')
   bslide.grid(row = 8, column=2, columnspan=2)
-   
+  bars_shown = bslide.get()
+
+
+  #bslide.pack()
+     
   # upload csv
   DEFAULT_FILENAME = "sample.csv"
   filename = StringVar()
@@ -78,11 +87,12 @@ def main():
 
   # plot button
   run_btn = Button(text="Plot", command=lambda:\
-    animate_df(process_data(filename.get(), w.get(), is_date.get(), date_format.get()),\
-      chart_title.get(), y_axis.get(), x_axis.get()))
+    animate_df(process_data(filename.get(), w.get(), bslide.get(), is_date.get(), date_format.get()),\
+      chart_title.get(), y_axis.get(), x_axis.get(), bslide.get()))
   run_btn.grid(row=9, columnspan=3)
 
   window.mainloop()
+
 
 def select_csv(window, filename_var):
   selected_filename = filedialog.askopenfilename(parent=window,\
@@ -92,10 +102,12 @@ def select_csv(window, filename_var):
   if selected_filename:
     filename_var.set(selected_filename)
 
-def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y"):
+
+def process_data(file_name, num_frames, bars_shown, is_date=False, format_string="%m/%d/%Y"):
   df = pd.read_csv(file_name)
   index_col_name = df.columns[0]
   df = df.set_index(index_col_name)
+
   
   df = df.fillna(value=0)
 
@@ -107,7 +119,7 @@ def process_data(file_name, num_frames, is_date=False, format_string="%m/%d/%Y")
 
   # this only works right if the data is already sorted
   first_idx = df.index[0]
-  last_idx = df.index[len(df.index) - 1]
+  last_idx = df.index[len(df) - 1]
 
   # add one row for each year, this will not work
   # well for every dataset (room for improvement here)
@@ -150,37 +162,46 @@ def expand_df(df, num_frames):
 
   return df
 
-def animate_df(df, title, ylabel, xlabel):
+def animate_df(df, title, ylabel, xlabel, bars_shown):
   num_bars = len(df.columns)
   colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
-
-  max_bar = df.max().max()
-  min_bar = df.min().min()
-
-  x_max = max_bar + (max_bar - min_bar) * 0.05
-  x_min = min_bar - (max_bar - min_bar) * 0.01
-  
+   
   fig = plt.figure()
 
-  # note - maybe we could make this a function outside of this one?
   def draw_graph(frame):
     ax = plt.axes(label=str(frame))
-    
+    length = len(df)
+    my_list =[]
+    categories = []
+    new_colors = []
+
     series        = df.iloc[frame] #selects ith row
-    rank          = series.rank(method='first')
-    # to do: only show certain max number of bars
-    categories    = series.index
-    values        = series.array # y-axis
+    rank          = series.rank(method = 'first', ascending=0)
+    print(rank)
+    for i in range(1,bars_shown+1):
+      for j in range(len(series)):
+        if rank[j] == i:
+          my_list.append(series[j])
+          categories.append(series.index[j])
+          new_colors.append(colors[j])
     
+    values = my_list # x-axis
+   
+    max_bar = df.max().max()
+    min_bar = df.min().min()
+
+    x_max = max_bar + (max_bar - min_bar) * 0.05
+    x_min = min_bar - (max_bar - min_bar) * 0.01
+
+       
     ax.set_xlim(left=x_min, right=x_max)
-    ax.barh(rank, values, tick_label=categories, color=colors)
+    ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
 
     plt.title(title)
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
 
-  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
-
+  graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=500, repeat_delay=100)
   plt.show()
 
 def rand_colors(num_colors, min_val=0, max_val=1):
