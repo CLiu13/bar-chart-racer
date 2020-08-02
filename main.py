@@ -64,7 +64,7 @@ def main():
 
  # slider bars
   Label(window, text ="Number of bars").grid(row=8, column=1)
-  bslide = Scale(window, from_=1, to=20, orient = 'horizontal')
+  bslide = Scale(window, from_=1, to=len(df), orient = 'horizontal')
   bslide.grid(row = 8, column=2, columnspan=2)
 
   # upload csv
