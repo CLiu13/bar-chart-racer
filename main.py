@@ -6,7 +6,6 @@ import datetime
 from tkinter import *
 from tkinter import font, filedialog
 from tkinter import tix
-import numpy as np
 from pandas import DataFrame
 
 def main():
@@ -177,7 +176,7 @@ def animate_df(df, title, ylabel, xlabel, bars_shown):
 
     series        = df.iloc[frame] #selects ith row
     rank          = series.rank(method = 'first', ascending=0)
-    print(rank)
+
     for i in range(1,bars_shown+1):
       for j in range(len(series)):
         if rank[j] == i:
