@@ -297,9 +297,9 @@ def animate_df(df, title, ylabel, xlabel, bars_shown, has_custom_color, color_he
     ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
 
     if has_custom_color:
-      ax.barh(rank, values, tick_label=categories, color=color_hex)
+      ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=color_hex)
      else:
-      ax.barh(rank, values, tick_label=categories, color=colors)
+      ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
 
      plt.title(title)
      plt.ylabel(ylabel)
