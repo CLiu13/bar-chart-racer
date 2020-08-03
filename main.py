@@ -237,6 +237,8 @@ def expand_df(df, num_frames):
 def animate_df(df, title, ylabel, xlabel, bars_shown, has_custom_color, color_hex):
   try:
     num_bars = len(df.columns)
+    if bars_shown > num_bars:
+      bars_shown = num_bars
 
     if not has_custom_color:
       colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
