@@ -5,7 +5,6 @@ import random
 import datetime
 import traceback
 from tkinter import *
-from pandas import DataFrame
 from tkinter import tix, filedialog, font, messagebox, colorchooser
 
 # determine whether to print caught exceptions
@@ -252,7 +251,6 @@ def animate_df(df, title, ylabel, xlabel, bars_shown, has_custom_color, color_he
 
     def draw_graph(frame):
       plt.cla()
-      ax = plt.axes(label=str(frame))
       length = len(df)
       my_list =[]
       categories = []
@@ -280,7 +278,6 @@ def animate_df(df, title, ylabel, xlabel, bars_shown, has_custom_color, color_he
 
           
       ax.set_xlim(left=x_min, right=x_max)
-      ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
 
       if has_custom_color:
         ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=color_hex)
