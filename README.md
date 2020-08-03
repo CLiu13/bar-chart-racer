@@ -10,7 +10,7 @@ Our implementation provides an interface that allows the user to:
  - choose a color to customize the chart theme
  - view and export the final animation as a gif or mp4 file
 
-This program was coded in Python, using tkinter for the interface, pandas for data processing, and matplotlib for graphing and animation.
+This program was coded in Python using tkinter for the interface, pandas for data processing, and matplotlib for graphing and animation.
 
 ## Examples
 
@@ -26,4 +26,4 @@ You can find more examples of saved animations in the [examples](/examples) fold
 This video was created for CodeLabs Demo Day and provides a brief demonstration of using the program.
 
 ## Authors and acknowledgement
-This program was created as part of CodeLabs, an internship through CodeDay. Our interns are [Anusha Puri](https://github.com/puria123), [Lina Chihoub](https://github.com/linasc3-ai), and [Kirsten Graham](https://github.com/kirstenmg). Our mentor is [Charlie Liu](https://github.com/CLiu13).
+This program was created as part of [CodeLabs](https://labs.codeday.org/), a virtual internship program organized by CodeDay. Our interns are [Anusha Puri](https://github.com/puria123), [Lina Chihoub](https://github.com/linasc3-ai), and [Kirsten Graham](https://github.com/kirstenmg). Our mentor is [Charlie Liu](https://github.com/CLiu13).
