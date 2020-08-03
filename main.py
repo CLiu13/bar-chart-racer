@@ -59,8 +59,8 @@ def main():
 
   #slider frame
   Label(window, text="Frame count").grid(row=7, column=1)
-  w = Scale(window, from_=10, to=1000, orient='horizontal')
-  w.grid(row=7, column=2, columnspan=2)
+  frame_slider = Scale(window, from_=10, to=1000, orient='horizontal')
+  frame_slider.grid(row=7, column=2, columnspan=2)
 
  # slider bars
   Label(window, text ="Number of bars").grid(row=8, column=1)
@@ -110,8 +110,7 @@ def main():
   
   # plot button
   run_btn = Button(text="Plot", command=lambda:\
-
-    animate_df(process_data(filename.get(), w.get(), bslide.get(), is_date.get(), date_format.get()),\
+    run_animation(filename.get(), frame_slider.get(), is_date.get(), date_format.get(),\
       chart_title.get(), y_axis.get(), x_axis.get(), bslide.get(), has_custom_color.get(), hex_color.get()))
   run_btn.grid(row=10, columnspan=2)
 
@@ -123,12 +122,12 @@ def show_error(*args):
   messagebox.showerror("An error occurred", "Please try again.")
   
 def run_animation(filename, num_frames, is_date, format_string,\
-  chart_title, y_label, x_label, has_custom_color, hex_color):
+  chart_title, y_label, x_label, bar_count, has_custom_color, hex_color):
   
   dataframe = process_data(filename, num_frames, is_date, format_string)
   if dataframe is not None:
     animation_successful = animate_df(dataframe, chart_title, y_label, x_label,\
-      has_custom_color, hex_color)
+      bar_count, has_custom_color, hex_color)
     if not animation_successful:
       messagebox.showerror("Unable to create animation", "There was an issue " +\
         "while creating your animation. Please try again.")
@@ -147,14 +146,6 @@ def select_csv(window, filename_var):
   # only set if file was selected
   if selected_filename:
     filename_var.set(selected_filename)
-
-def process_data(file_name, num_frames, bars_shown, is_date=False, format_string="%m/%d/%Y"):
-  df = pd.read_csv(file_name)
-  index_col_name = df.columns[0]
-  df = df.set_index(index_col_name)
-
-  
-  df = df.fillna(value=0)
 
 def save_animation(window):
   if not graph_animation:
@@ -246,72 +237,68 @@ def expand_df(df, num_frames):
 
 def animate_df(df, title, ylabel, xlabel, bars_shown, has_custom_color, color_hex):
   try:
-   num_bars = len(df.columns)
+    num_bars = len(df.columns)
 
-   if not has_custom_color:
-    colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
+    if not has_custom_color:
+      colors = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
 
-   max_bar = df.max().max()
-   min_bar = df.min().min()
+    max_bar = df.max().max()
+    min_bar = df.min().min()
 
-   x_max = max_bar + (max_bar - min_bar) * 0.05
-   x_min = min_bar - (max_bar - min_bar) * 0.01
+    x_max = max_bar + (max_bar - min_bar) * 0.05
+    x_min = min_bar - (max_bar - min_bar) * 0.01
 
-   fig, ax = plt.subplots()
+    fig, ax = plt.subplots()
+
+    def draw_graph(frame):
+      plt.cla()
+      ax = plt.axes(label=str(frame))
+      length = len(df)
+      my_list =[]
+      categories = []
+      if not has_custom_color:
+        new_colors = []
+      
+      series        = df.iloc[frame] #selects ith row
+      rank          = series.rank(method = 'first', ascending=0)
+
+      for i in range(1,bars_shown+1):
+        for j in range(len(series)):
+          if rank[j] == i:
+            my_list.append(series[j])
+            categories.append(series.index[j])
+            if not has_custom_color:
+              new_colors.append(colors[j])
+        
+      values = my_list # x-axis
+      
+      max_bar = df.max().max()
+      min_bar = df.min().min()
+
+      x_max = max_bar + (max_bar - min_bar) * 0.05
+      x_min = min_bar - (max_bar - min_bar) * 0.01
+
+          
+      ax.set_xlim(left=x_min, right=x_max)
+      ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
+
+      if has_custom_color:
+        ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=color_hex)
+      else:
+        ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
+
+      plt.title(title)
+      plt.ylabel(ylabel)
+      plt.xlabel(xlabel)
+
+    global graph_animation
+    graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
   
-  num_bars = len(df.columns)
-  colors   = rand_colors(num_bars, min_val=0.5,    max_val=0.9)
-   
-  fig = plt.figure()
+    plt.show()
+      
+    return True
 
-  def draw_graph(frame):
-   
-  plt.cla()
-   ax = plt.axes(label=str(frame))
-   length = len(df)
-   my_list =[]
-   categories = []
-   new_colors = []
-   
-   series        = df.iloc[frame] #selects ith row
-   rank          = series.rank(method = 'first', ascending=0)
-
-   for i in range(1,bars_shown+1):
-    for j in range(len(series)):
-      if rank[j] == i:
-        my_list.append(series[j])
-        categories.append(series.index[j])
-        new_colors.append(colors[j])
-    
-   values = my_list # x-axis
-   
-   max_bar = df.max().max()
-   min_bar = df.min().min()
-
-   x_max = max_bar + (max_bar - min_bar) * 0.05
-   x_min = min_bar - (max_bar - min_bar) * 0.01
-
-       
-   ax.set_xlim(left=x_min, right=x_max)
-   ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
-
-   if has_custom_color:
-    ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=color_hex)
-   else:
-    ax.barh(range(bars_shown+1,1,-1), values, tick_label=categories, color=new_colors)
-
-   plt.title(title)
-   plt.ylabel(ylabel)
-   plt.xlabel(xlabel)
-
-   global graph_animation
-   graph_animation = animation.FuncAnimation(fig, draw_graph, range(len(df)), interval=50, repeat_delay=100)
- 
-   plt.show()
-    
-   return True
-
-   except:
+  except:
     if DEBUG:
       traceback.print_exc()
     return False
@@ -324,6 +311,6 @@ def rand_colors(num_colors, min_val=0, max_val=1):
     g = random.uniform(min_val, max_val)
     b = random.uniform(min_val, max_val)
     colors.append((r, g, b))
-   return colors
+  return colors
 
 main()
